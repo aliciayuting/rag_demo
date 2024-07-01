@@ -14,10 +14,14 @@
 
    Generator model
 
+## Branches
+This is a correctness testing branch
 
 # Run
-## Server Commands
-This is a bare-minimal setup of cascade server. It only requires two server nodes to start the service. n0, n1. run ``` ./run.sh server ``` under the build directory of the corresponding folder starts the service.
+## Servers Commands
+n0 - n3 are server nodes
+
+n4, n5, n6 are client nodes
 
 ## Client Commands
 1. create object pools
