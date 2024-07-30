@@ -166,7 +166,7 @@ class CentroidsSearchOCDPO: public DefaultOffCriticalDataPathObserver {
                                         nlohmann::json(query_texts).dump();
             Blob blob(reinterpret_cast<const uint8_t*>(query_emb_string.c_str()), query_emb_string.size());
 #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CENTROIDS_EMBEDDINGS_UDL_EMIT_START,client_id,query_batch_id,pair.first);
+            TimestampLogger::log(LOG_CENTROIDS_EMBEDDINGS_UDL_EMIT_START,this->my_id,query_batch_id,pair.first);
 #endif
             emit(new_key, EMIT_NO_VERSION_AND_TIMESTAMP , blob);
 #ifdef ENABLE_VORTEX_EVALUATION_LOGGING

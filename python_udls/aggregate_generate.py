@@ -198,7 +198,7 @@ class AggregateGenerateUDL(UserDefinedLogic):
                batch_id = int(match.group(2))
                query_batch_id = batch_id * 100000 + qid
           if usable_logging_key:
-               self.tl.log(LOG_TAG_AGG_UDL_START,client_id, query_batch_id, cluster_id)
+               self.tl.log(LOG_TAG_AGG_UDL_START,self.my_id, query_batch_id, cluster_id)
 
           # 1. parse the blob to dict
           bytes_obj = blob.tobytes()

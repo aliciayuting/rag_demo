@@ -116,7 +116,7 @@ class ClustersSearchOCDPO: public DefaultOffCriticalDataPathObserver {
         bool usable_logging_key = parse_batch_id(key_string, client_id, query_batch_id); // Logging purpose
         if (!usable_logging_key)
             dbg_default_error("Failed to parse client_id and query_batch_id from key: {}, unable to track correctly.", key_string);
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_START,client_id,query_batch_id,cluster_id);
+        TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_START,this->my_id,query_batch_id,cluster_id);
 #endif
         // 1. compute knn for the corresponding cluster on this node
         // 1.1. check if local cache contains the embeddings of the cluster
@@ -187,7 +187,7 @@ class ClustersSearchOCDPO: public DefaultOffCriticalDataPathObserver {
             Blob blob(reinterpret_cast<const uint8_t*>(json_str.c_str()), json_str.size());
             // 4.3 emit the result
 #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_START,client_id,query_batch_id,cluster_id);
+            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_START,this->my_id,query_batch_id,cluster_id);
 #endif
             emit(new_keys[idx], EMIT_NO_VERSION_AND_TIMESTAMP , blob);
 #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
