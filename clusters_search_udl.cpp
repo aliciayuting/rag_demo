@@ -118,90 +118,95 @@ class ClustersSearchOCDPO: public DefaultOffCriticalDataPathObserver {
             dbg_default_error("Failed to parse client_id and query_batch_id from key: {}, unable to track correctly.", key_string);
         TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_START,this->my_id,query_batch_id,cluster_id);
 #endif
-        // 1. compute knn for the corresponding cluster on this node
-        // 1.1. check if local cache contains the embeddings of the cluster
-        auto it = this->clusters_embs.find(cluster_id);
-        if (it == this->clusters_embs.end()){
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_LOADEMB_START,this->my_id,cluster_id,0);
-#endif
-            this->clusters_embs[cluster_id]= std::make_unique<GroupedEmbeddingsForSearch>(this->faiss_search_type, this->emb_dim);
-            std::string cluster_prefix = "/rag/emb/cluster" + std::to_string(cluster_id);
-            int filled_cluster_embs = this->clusters_embs[cluster_id]->retrieve_grouped_embeddings(cluster_prefix,typed_ctxt);
-            if (filled_cluster_embs == -1) {
-                std::cerr << "Error: failed to fill the cluster embeddings in cache" << std::endl;
-                dbg_default_error("Failed to fill the cluster embeddings in cache, at clusters_search_udl.");
-                return;
-            }
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_LOADEMB_END,this->my_id,cluster_id,0);
-#endif
-            it = this->clusters_embs.find(cluster_id);
-        }
-        // 1.2. get the embeddings of the cluster
-        auto& embs = it->second;
+        std::string to_remove = "_cluster";
+        size_t pos = key_string.find(to_remove);
+        std::string new_key = key_string.substr(0, pos) + "_result";
+        Blob blob(reinterpret_cast<const uint8_t*>(object.blob.bytes), object.blob.size, true);
+        emit(new_key, EMIT_NO_VERSION_AND_TIMESTAMP, blob);
+//         // 1. compute knn for the corresponding cluster on this node
+//         // 1.1. check if local cache contains the embeddings of the cluster
+//         auto it = this->clusters_embs.find(cluster_id);
+//         if (it == this->clusters_embs.end()){
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//             TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_LOADEMB_START,this->my_id,cluster_id,0);
+// #endif
+//             this->clusters_embs[cluster_id]= std::make_unique<GroupedEmbeddingsForSearch>(this->faiss_search_type, this->emb_dim);
+//             std::string cluster_prefix = "/rag/emb/cluster" + std::to_string(cluster_id);
+//             int filled_cluster_embs = this->clusters_embs[cluster_id]->retrieve_grouped_embeddings(cluster_prefix,typed_ctxt);
+//             if (filled_cluster_embs == -1) {
+//                 std::cerr << "Error: failed to fill the cluster embeddings in cache" << std::endl;
+//                 dbg_default_error("Failed to fill the cluster embeddings in cache, at clusters_search_udl.");
+//                 return;
+//             }
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//             TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_LOADEMB_END,this->my_id,cluster_id,0);
+// #endif
+//             it = this->clusters_embs.find(cluster_id);
+//         }
+//         // 1.2. get the embeddings of the cluster
+//         auto& embs = it->second;
 
-        // 2. get the query embeddings from the object
+//         // 2. get the query embeddings from the object
 
-        float* data;
-        uint32_t nq;
-        std::vector<std::string> query_list;
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_DESERIALIZE_START,client_id,query_batch_id,cluster_id);
-#endif
-        try{
-            deserialize_embeddings_and_quries_from_bytes(object.blob.bytes,object.blob.size,nq,this->emb_dim,data,query_list);
-        } catch (const std::exception& e) {
-            std::cerr << "Error: failed to deserialize the query embeddings and query texts from the object." << std::endl;
-            dbg_default_error("Failed to deserialize the query embeddings and query texts from the object, at centroids_search_udl.");
-            return;
-        }
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_DESERIALIZE_END,client_id,query_batch_id,cluster_id);
-#endif
+//         float* data;
+//         uint32_t nq;
+//         std::vector<std::string> query_list;
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//         TimestampLogger::log(LOG_CLUSTER_SEARCH_DESERIALIZE_START,client_id,query_batch_id,cluster_id);
+// #endif
+//         try{
+//             deserialize_embeddings_and_quries_from_bytes(object.blob.bytes,object.blob.size,nq,this->emb_dim,data,query_list);
+//         } catch (const std::exception& e) {
+//             std::cerr << "Error: failed to deserialize the query embeddings and query texts from the object." << std::endl;
+//             dbg_default_error("Failed to deserialize the query embeddings and query texts from the object, at centroids_search_udl.");
+//             return;
+//         }
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//         TimestampLogger::log(LOG_CLUSTER_SEARCH_DESERIALIZE_END,client_id,query_batch_id,cluster_id);
+// #endif
 
-        // 3. search the top K embeddings that are close to the query
-        long* I = new long[this->top_k * nq];
-        float* D = new float[this->top_k * nq];
-        embs->search(nq,data,this->top_k,D,I);
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_FAISS_SEARCH_END,client_id,query_batch_id,cluster_id);
-#endif
+//         // 3. search the top K embeddings that are close to the query
+//         long* I = new long[this->top_k * nq];
+//         float* D = new float[this->top_k * nq];
+//         embs->search(nq,data,this->top_k,D,I);
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//         TimestampLogger::log(LOG_CLUSTER_SEARCH_FAISS_SEARCH_END,client_id,query_batch_id,cluster_id);
+// #endif
 
-        // 4. emit the result to the subsequent UDL
-        // 4.1 construct new keys for all queries in this search
-        std::vector<std::string> new_keys;
-        construct_new_keys(new_keys, key_string, query_list);
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_CONSTRUCT_KEYS_END,client_id,query_batch_id,cluster_id);
-#endif
-        int idx = 0;
-        for (auto it = query_list.begin(); it != query_list.end(); ++it) {
-            // 4.2 construct the cluster search result of query idx
-            nlohmann::json json_obj; // format it as {"emb_id1": distance1, ...}
-            for (int j = 0; j < this->top_k; j++) {
-                json_obj[std::to_string(I[idx * this->top_k + j])] = std::to_string(D[idx * this->top_k + j]);
-            }
-            json_obj["query_text"] = *it;
-            std::string json_str = json_obj.dump();
-            Blob blob(reinterpret_cast<const uint8_t*>(json_str.c_str()), json_str.size());
-            // 4.3 emit the result
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_START,this->my_id,query_batch_id,cluster_id);
-#endif
-            emit(new_keys[idx], EMIT_NO_VERSION_AND_TIMESTAMP , blob);
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-            TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_END,client_id,query_batch_id,cluster_id);
-#endif
-            dbg_default_debug("[Cluster search ocdpo]: Emitted key:{} " ,new_keys[idx]);
-            idx ++;
-        }
-        delete[] I;
-        delete[] D;
-#ifdef ENABLE_VORTEX_EVALUATION_LOGGING
-        TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_END,client_id,query_batch_id,cluster_id);
-#endif
-        dbg_default_debug("[Cluster search ocdpo]: FINISHED knn search for key: {}.", key_string );
+//         // 4. emit the result to the subsequent UDL
+//         // 4.1 construct new keys for all queries in this search
+//         std::vector<std::string> new_keys;
+//         construct_new_keys(new_keys, key_string, query_list);
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//         TimestampLogger::log(LOG_CLUSTER_SEARCH_CONSTRUCT_KEYS_END,client_id,query_batch_id,cluster_id);
+// #endif
+//         int idx = 0;
+//         for (auto it = query_list.begin(); it != query_list.end(); ++it) {
+//             // 4.2 construct the cluster search result of query idx
+//             nlohmann::json json_obj; // format it as {"emb_id1": distance1, ...}
+//             for (int j = 0; j < this->top_k; j++) {
+//                 json_obj[std::to_string(I[idx * this->top_k + j])] = std::to_string(D[idx * this->top_k + j]);
+//             }
+//             json_obj["query_text"] = *it;
+//             std::string json_str = json_obj.dump();
+//             Blob blob(reinterpret_cast<const uint8_t*>(json_str.c_str()), json_str.size());
+//             // 4.3 emit the result
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//             TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_START,this->my_id,query_batch_id,cluster_id);
+// #endif
+//             emit(new_keys[idx], EMIT_NO_VERSION_AND_TIMESTAMP , blob);
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//             TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_EMIT_END,client_id,query_batch_id,cluster_id);
+// #endif
+//             dbg_default_debug("[Cluster search ocdpo]: Emitted key:{} " ,new_keys[idx]);
+//             idx ++;
+//         }
+//         delete[] I;
+//         delete[] D;
+// #ifdef ENABLE_VORTEX_EVALUATION_LOGGING
+//         TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_END,client_id,query_batch_id,cluster_id);
+// #endif
+//         dbg_default_debug("[Cluster search ocdpo]: FINISHED knn search for key: {}.", key_string );
     }
 
     static std::shared_ptr<OffCriticalDataPathObserver> ocdpo_ptr;

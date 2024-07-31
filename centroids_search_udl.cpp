@@ -85,7 +85,7 @@ class CentroidsSearchOCDPO: public DefaultOffCriticalDataPathObserver {
         ***/
         std::map<long, std::vector<int>> cluster_ids_to_query_ids = std::map<long, std::vector<int>>();
         cluster_ids_to_query_ids[1] = {0};
-        cluster_ids_to_query_ids[2] = {0};
+        // cluster_ids_to_query_ids[2] = {0};
 
         for (const auto& pair : cluster_ids_to_query_ids) {
             if (pair.first == -1) {
