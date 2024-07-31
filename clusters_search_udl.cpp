@@ -120,8 +120,7 @@ class ClustersSearchOCDPO: public DefaultOffCriticalDataPathObserver {
 #endif
         std::string to_remove = "_cluster";
         size_t pos = key_string.find(to_remove);
-        std::string new_key = key_string.substr(0, pos) + "_result";
-        std::cout << new_key << std::endl;
+        std::string new_key = key_string.substr(0, pos) + "_result/109";
         Blob blob(reinterpret_cast<const uint8_t*>(object.blob.bytes), object.blob.size, true);
         emit(new_key, EMIT_NO_VERSION_AND_TIMESTAMP, blob);
 //         // 1. compute knn for the corresponding cluster on this node
