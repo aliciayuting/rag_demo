@@ -118,9 +118,10 @@ class ClustersSearchOCDPO: public DefaultOffCriticalDataPathObserver {
             dbg_default_error("Failed to parse client_id and query_batch_id from key: {}, unable to track correctly.", key_string);
         TimestampLogger::log(LOG_CLUSTER_SEARCH_UDL_START,this->my_id,query_batch_id,cluster_id);
 #endif
-        std::string to_remove = "_cluster1";
+        std::string to_remove = "_cluster";
         size_t pos = key_string.find(to_remove);
         std::string new_key = key_string.substr(0, pos) + "_result";
+        std::cout << new_key << std::endl;
         Blob blob(reinterpret_cast<const uint8_t*>(object.blob.bytes), object.blob.size, true);
         emit(new_key, EMIT_NO_VERSION_AND_TIMESTAMP, blob);
 //         // 1. compute knn for the corresponding cluster on this node
