@@ -15,7 +15,7 @@ USE_WHICH_FAISE_SAERCH = 0 # 0: cpu_flat, 1: gpu_flat, 2: gpu_ivf_flat, 3: gpu_i
 Configuration for client side batch requests
 '''
 TOTAL_BATCH_COUNT = 10
-QUERY_PER_BATCH = 6
+QUERY_PER_BATCH = 1
 MAX_RESULT_WAIT_TIME = 240 # seconds
 RETRIEVE_WAIT_INTERVAL = 0.5 # seconds
 PRINT_FINISH_INTEVAL = 100 # print a checkpoint after 100 batches 

@@ -4,7 +4,7 @@
         "desc": "Vortex UDLs Dataflow graph",
         "graph": [
             {
-                "pathname": "/rag/emb/centroids_search",
+                "pathname": "/first",
                 "shard_dispatcher_list": ["one"],
                 "user_defined_logic_list": ["10a2c111-1100-1100-1000-0001ac110000"],
                 "user_defined_logic_stateful_list": ["singlethreaded"],
@@ -15,10 +15,10 @@
                         "top_num_centroids":2,
                         "faiss_search_type":0
                     }],
-                "destinations": [{"/rag/emb/clusters_search":"put"}]
+                "destinations": [{"/second":"put"}]
             },
             {
-                "pathname": "/rag/emb/clusters_search",
+                "pathname": "/second",
                 "shard_dispatcher_list": ["one"],
                 "user_defined_logic_list": ["11a2c123-2200-21ac-1755-0002ac220000"],
                 "user_defined_logic_stateful_list": ["singlethreaded"],
@@ -28,23 +28,7 @@
                         "top_k":3,
                         "faiss_search_type":0
                 }],
-                "destinations": [{"/rag/generate/agg":"put"}]
-            },
-            {
-                "pathname": "/rag/generate/agg",
-                "shard_dispatcher_list": ["one"],
-                "user_defined_logic_list": ["6cfe8f64-3a1d-11ed-8e7e-0242ac110006"],
-                "user_defined_logic_stateful_list": ["singlethreaded"],
-                "user_defined_logic_config_list": [
-                    {
-                        "python_path":["python_udls"],
-                        "module":"aggregate_generate",
-                        "entry_class":"AggregateGenerateUDL",
-                        "top_num_centroids":2,
-                        "top_k":2,
-                        "include_llm":0
-                    }],
-                "destinations": [{}]
+                "destinations": [{"/final":"put"}]
             }
         ]
     }

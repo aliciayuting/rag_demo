@@ -60,16 +60,16 @@ set(LOG_CENTROIDS_EMBEDDINGS_UDL_EMIT_START 20050)
 set(LOG_CENTROIDS_EMBEDDINGS_UDL_EMIT_END 20051)
 set(LOG_CENTROIDS_EMBEDDINGS_UDL_END 20100)
 
-add_library(centroids_search_udl SHARED centroids_search_udl.cpp)
-target_include_directories(centroids_search_udl PRIVATE
+add_library(first_udl SHARED first_udl.cpp)
+target_include_directories(first_udl PRIVATE
     ${FAISS_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 )
-target_link_libraries(centroids_search_udl PRIVATE derecho::cascade faiss CUDA::cudart)
-target_compile_definitions(centroids_search_udl PRIVATE
+target_link_libraries(first_udl PRIVATE derecho::cascade faiss CUDA::cudart)
+target_compile_definitions(first_udl PRIVATE
     LOG_CENTROIDS_EMBEDDINGS_UDL_START=${LOG_CENTROIDS_EMBEDDINGS_UDL_START}
     LOG_CENTROIDS_EMBEDDINGS_LOADING_START=${LOG_CENTROIDS_EMBEDDINGS_LOADING_START}
     LOG_CENTROIDS_EMBEDDINGS_LOADING_END=${LOG_CENTROIDS_EMBEDDINGS_LOADING_END}
@@ -131,17 +131,17 @@ set(LOG_CLUSTER_SEARCH_UDL_EMIT_END 30051)
 set(LOG_CLUSTER_SEARCH_UDL_END 30100)
 
 
-add_library(clusters_search_udl SHARED clusters_search_udl.cpp)
-target_include_directories(clusters_search_udl PRIVATE
+add_library(second_udl SHARED second_udl.cpp)
+target_include_directories(second_udl PRIVATE
     ${FAISS_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 )
-target_link_libraries(clusters_search_udl PRIVATE derecho::cascade faiss CUDA::cudart)
+target_link_libraries(second_udl PRIVATE derecho::cascade faiss CUDA::cudart)
 
-target_compile_definitions(clusters_search_udl PRIVATE
+target_compile_definitions(second_udl PRIVATE
     LOG_CLUSTER_SEARCH_UDL_START=${LOG_CLUSTER_SEARCH_UDL_START}
     LOG_CLUSTER_SEARCH_UDL_LOADEMB_START=${LOG_CLUSTER_SEARCH_UDL_LOADEMB_START}
     LOG_CLUSTER_SEARCH_UDL_LOADEMB_END=${LOG_CLUSTER_SEARCH_UDL_LOADEMB_END}
@@ -161,7 +161,7 @@ configure_file(
     "${PROJECT_BINARY_DIR}/logging_tags.py"
 )
 
-add_custom_command(TARGET clusters_search_udl POST_BUILD
+add_custom_command(TARGET second_udl POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/cfg
         ${CMAKE_CURRENT_BINARY_DIR}/cfg
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/python_udls
