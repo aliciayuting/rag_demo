@@ -92,43 +92,43 @@ def main(argv):
           tl.log(LOG_TAG_QUERIES_SENDING_START, client_id, querybatch_id, 0)
           capi.put(key, encoded_bytes)
           tl.log(LOG_TAG_QUERIES_SENDING_END, client_id, querybatch_id, 0)
-          logging.debug(f"Put queries to key:{key}, batch_size:{len(query_list)}")
+          logging.debug(f"Put queries to key:{key}, batch_size:{len(encoded_bytes)}")
 
           # Wait for result of this batch
           result_prefix = "/final/" + f"{querybatch_id}_result"
-          result_generated = False
-          wait_time = 0
-          retrieved_queries = set() # track the queries to be retrieved
-          while not result_generated and wait_time < MAX_RESULT_WAIT_TIME:
-               existing_queries = capi.list_keys_in_object_pool(result_prefix)
-               new_keys_to_retrieve = [] 
-               # Need to process all the futures, because embedding objects may hashed to different shards
-               for r in existing_queries:
-                    keys = r.get_result()
-                    for key in keys:
-                         if key not in retrieved_queries:
-                              new_keys_to_retrieve.append(key)
-               for result_key in new_keys_to_retrieve:
-                    result_future = capi.get(result_key)
-                    if result_future:
-                         res_dict = result_future.get_result()
-                         if len(res_dict['value']) > 0:
-                              retrieved_queries.add(result_key)
+          result_generated = True
+          # wait_time = 0
+          # retrieved_queries = set() # track the queries to be retrieved
+          # while not result_generated and wait_time < MAX_RESULT_WAIT_TIME:
+          #      existing_queries = capi.list_keys_in_object_pool(result_prefix)
+          #      new_keys_to_retrieve = [] 
+          #      # Need to process all the futures, because embedding objects may hashed to different shards
+          #      for r in existing_queries:
+          #           keys = r.get_result()
+          #           for key in keys:
+          #                if key not in retrieved_queries:
+          #                     new_keys_to_retrieve.append(key)
+          #      for result_key in new_keys_to_retrieve:
+          #           result_future = capi.get(result_key)
+          #           if result_future:
+          #                res_dict = result_future.get_result()
+          #                if len(res_dict['value']) > 0:
+          #                     retrieved_queries.add(result_key)
                               
-                              # result dictionary format["query_id": (float(distance), int(cluster_id), int(emb_id)), "query_id":(...) ... ]
-                              logging.debug(f"Got result from key:{result_key}")
-                    else:
-                         logging.debug(f"Getting key:{result_key} with NULL result_future.")
-               if num_queries == len(retrieved_queries):
-                    result_generated = True
-               else:
-                    time.sleep(RETRIEVE_WAIT_INTERVAL)
-                    wait_time += RETRIEVE_WAIT_INTERVAL
+          #                     # result dictionary format["query_id": (float(distance), int(cluster_id), int(emb_id)), "query_id":(...) ... ]
+          #                     logging.debug(f"Got result from key:{result_key}")
+          #           else:
+          #                logging.debug(f"Getting key:{result_key} with NULL result_future.")
+          #      if num_queries == len(retrieved_queries):
+          #           result_generated = True
+          #      else:
+          time.sleep(RETRIEVE_WAIT_INTERVAL)
+                    # wait_time += RETRIEVE_WAIT_INTERVAL
           if not result_generated:
                logging.debug(f"Failed to get result for querybatch_id:{querybatch_id} after {MAX_RESULT_WAIT_TIME} seconds.")
           if (querybatch_id + 1) % PRINT_FINISH_INTEVAL == 0:
                print(f"Finished processing query_batch {querybatch_id}")
-
+     time.sleep(10)
      tl.flush(f"client_timestamp.dat")
 
      # notify all nodes to flush logs
